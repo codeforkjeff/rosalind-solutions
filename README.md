@@ -13,4 +13,9 @@ that language for a few years and I miss working with it.
 Open this repository as a project in IntelliJ. You can run individual problems in IntelliJ by opening
 the appropriate .java file and clicking "Run" in its context menu.
 
-Running problems from the CLI using the .jar file is currently a work in progress.
+You can also build a jar by running "mvn package" and running problems on the command line:
+
+```
+# replace PROBLEM_ID with a code like GC, FIB, etc.
+java -jar target/rosalind-solutions-1.0-SNAPSHOT.jar PROBLEM_ID
+```
