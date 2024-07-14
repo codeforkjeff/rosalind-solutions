@@ -1,6 +1,7 @@
 package com.codefork.rosalind.problems;
 
 import com.codefork.rosalind.Problem;
+import com.codefork.rosalind.util.Genotype;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -9,49 +10,18 @@ import java.util.HashMap;
 
 public class MendelsFirstLaw extends Problem {
 
-    public enum Zygosity {
-        AA, // homozygous dominant
-        Aa, // heterozygous
-        aa; // homozygous recessive
-
-        public Zygosity[] possibleOffspring(Zygosity mate) {
-            /* this accomplishes the same thing more abstractly using streams but is way less readable */
-            // var offspring = IntStream.range(0, this.name().length()).mapToObj(i -> this.name().substring(i, i+1)).flatMap(ch -> {
-            //     return IntStream.range(0, mate.name().length()).mapToObj(i -> ch + mate.name().substring(i, i+1));
-            // }).map(zygStr -> normalize(zygStr)).toList();
-            // Zygosity[] result = new Zygosity[offspring.size()];
-            // return offspring.toArray(result);
-
-            return new Zygosity[] {
-                    normalize(this.name().substring(0,1) + mate.name().substring(0, 1)),
-                    normalize(this.name().substring(0,1) + mate.name().substring(1, 2)),
-                    normalize(this.name().substring(1,2) + mate.name().substring(0, 1)),
-                    normalize(this.name().substring(1,2) + mate.name().substring(1, 2)),
-            };
-        }
-
-        /**
-         * normalizes strings like "aA" to "Aa"
-         */
-        public static Zygosity normalize(String s) {
-            var a = s.toCharArray();
-            Arrays.sort(a);
-            return Zygosity.valueOf(String.valueOf(a));
-        }
-    }
-
     // node in a probability tree
     public static class PNode {
-        private final Zygosity selection;
-        private final HashMap<Zygosity, Integer> remaining = new HashMap<>();
+        private final Genotype selection;
+        private final HashMap<Genotype, Integer> remaining = new HashMap<>();
         private float probability = 0;
         private ArrayList<PNode> children = new ArrayList<>();
 
-        public PNode(Zygosity selection) {
+        public PNode(Genotype selection) {
             this.selection = selection;
         }
 
-        public PNode(Zygosity selection, HashMap<Zygosity, Integer> remaining) {
+        public PNode(Genotype selection, HashMap<Genotype, Integer> remaining) {
             this(selection);
             this.remaining.putAll(remaining);
         }
@@ -64,7 +34,7 @@ public class MendelsFirstLaw extends Problem {
          * Creates a node representing a selection from this node's "remaining"
          * and adds it as a child
          */
-        public PNode makeNewSelection(Zygosity newSelection) {
+        public PNode makeNewSelection(Genotype newSelection) {
             var child = new PNode(newSelection);
 
             child.setProbability(remaining.get(newSelection) / (float) getSizeRemaining());
@@ -77,7 +47,7 @@ public class MendelsFirstLaw extends Problem {
             return child;
         }
 
-        public HashMap<Zygosity, Integer> getRemaining() {
+        public HashMap<Genotype, Integer> getRemaining() {
             return remaining;
         }
 
@@ -85,7 +55,7 @@ public class MendelsFirstLaw extends Problem {
             return remaining.values().stream().mapToInt(i -> i).sum();
         }
 
-        public Zygosity getSelection() {
+        public Genotype getSelection() {
             return selection;
         }
 
@@ -106,7 +76,7 @@ public class MendelsFirstLaw extends Problem {
          */
         public static void printTree(PNode node, int level) {
             var indent = " ".repeat(level * 2);
-            var remainingStr = String.format("remaining k=%d m=%d n=%d", node.remaining.get(Zygosity.AA), node.remaining.get(Zygosity.Aa), node.remaining.get(Zygosity.aa));
+            var remainingStr = String.format("remaining k=%d m=%d n=%d", node.remaining.get(Genotype.AA), node.remaining.get(Genotype.Aa), node.remaining.get(Genotype.aa));
             System.out.println(indent + node.getSelection().toString() + " " + node.getProbability() + " " + remainingStr);
             for (PNode child : node.getChildren()) {
                 printTree(child, level + 1);
@@ -179,22 +149,22 @@ public class MendelsFirstLaw extends Problem {
         var m = Integer.valueOf(parts[1]); // number of heterozygous
         var n = Integer.valueOf(parts[2]); // number of homozygous recessive
 
-        var initial = new HashMap<Zygosity, Integer>();
-        initial.put(Zygosity.AA, k);
-        initial.put(Zygosity.Aa, m);
-        initial.put(Zygosity.aa, n);
+        var initial = new HashMap<Genotype, Integer>();
+        initial.put(Genotype.AA, k);
+        initial.put(Genotype.Aa, m);
+        initial.put(Genotype.aa, n);
 
         // making a tree is a bit weird because it's only ever going to be two levels deep.
         // seems overly abstract, but it follows how the problem was laid out, and it IS
         // actually helpful for understanding combining probabilities
 
         // zygosity/probability doesn't matter here, we just need a root node
-        var root = new PNode(Zygosity.AA, initial);
+        var root = new PNode(Genotype.AA, initial);
 
         // make a tree 2 levels deep (2 selections)
-        for (Zygosity z1 : Zygosity.values()) {
+        for (Genotype z1 : Genotype.values()) {
             var node = root.makeNewSelection(z1);
-            for (Zygosity z2 : Zygosity.values()) {
+            for (Genotype z2 : Genotype.values()) {
                 if (node.getRemaining().get(z2) > 0) {
                     node.makeNewSelection(z2);
                 }
