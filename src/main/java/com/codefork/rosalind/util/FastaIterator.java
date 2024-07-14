@@ -18,7 +18,7 @@ public class FastaIterator implements Iterator<FastaRecord> {
         try {
             this.line = this.reader.readLine();
         } catch (IOException e) {
-            System.out.println(String.format("error reading from file", e));
+            throw new RuntimeException(e);
         }
     }
 
