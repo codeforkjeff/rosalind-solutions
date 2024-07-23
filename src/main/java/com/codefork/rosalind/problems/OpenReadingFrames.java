@@ -18,15 +18,13 @@ public class OpenReadingFrames extends Problem {
 
     public static final Pattern getORFPattern() {
         var stopCodonsGroup = "(" +
-                Arrays.stream(DNACodonTable.STOP_CODONS).collect(Collectors.joining("|")) + ")";
+                DNACodonTable.STOP_CODONS.stream().collect(Collectors.joining("|")) + ")";
         return Pattern.compile("ATG(.{3})*?" + stopCodonsGroup);
     }
 
     public static final Pattern pat = getORFPattern();
 
     public static final Set<String> getCandidateProteinStrings(String seq) {
-        var stopCodons = Arrays.stream(DNACodonTable.STOP_CODONS).collect(Collectors.toSet());
-
         var results = new HashSet<String>();
 
         var remainder = seq;
@@ -38,7 +36,7 @@ public class OpenReadingFrames extends Problem {
             var i = 0;
             while(true) {
                 var codon = match.substring(i, i+3);
-                if(!stopCodons.contains(codon)) {
+                if(!DNACodonTable.STOP_CODONS.contains(codon)) {
                     protein.append(DNACodonTable.TABLE.get(codon));
                     i += 3;
                 } else {

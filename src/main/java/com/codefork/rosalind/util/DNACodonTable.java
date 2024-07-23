@@ -1,6 +1,9 @@
 package com.codefork.rosalind.util;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Map.entry;
 
@@ -75,9 +78,10 @@ public class DNACodonTable {
             entry("GGG", "G")
     );
 
-    public static final String[] STOP_CODONS = TABLE.entrySet().stream()
+    private static final String[] STOP_CODONS_ARRAY = TABLE.entrySet().stream()
             .filter(entry ->entry.getValue().equals(DNACodonTable.STOP))
             .map(Map.Entry::getKey)
             .toArray(String[]::new);
 
+    public static final Set<String> STOP_CODONS = Arrays.stream(STOP_CODONS_ARRAY).collect(Collectors.toSet());
 }
