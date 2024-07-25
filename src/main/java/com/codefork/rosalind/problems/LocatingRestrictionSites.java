@@ -8,10 +8,6 @@ import java.io.InputStream;
 
 public class LocatingRestrictionSites extends Problem {
 
-    public static boolean isReversePalindrome(String seq) {
-        return seq.equals(new ReverseComplement().apply(seq));
-    }
-
     @Override
     public String getID() {
         return "REVP";
@@ -22,13 +18,22 @@ public class LocatingRestrictionSites extends Problem {
         var iter = new FastaIterator(is);
         var record = iter.next();
         var seq = record.seq();
+        var seqLen = seq.length();
+
+        // calculate the reverse complement once for entire sequence
+        // and use it to look up reverse complements for portions of the sequence.
+        // this is faster than generating the reverse complement each iteration
+        // in the inner loop (2ms vs 5ms for the real dataset)
+        var completeRc = new ReverseComplement().apply(seq);
+        var completeRcLen = completeRc.length();
 
         StringBuffer results = new StringBuffer();
 
         for(var length = 4; length <= 12; length++) {
-            for(var i  = 0; i + length <= seq.length(); i++) {
+            for(var i  = 0; i + length <= seqLen; i++) {
                 var candidate = seq.substring(i, i+length);
-                if(isReversePalindrome(candidate)) {
+                var rc = completeRc.substring(completeRcLen - (i + length), completeRcLen - i);
+                if(candidate.equals(rc)) {
                     results.append((i+1) + " " + length + "\n");
                 }
             }
