@@ -4,7 +4,6 @@ import com.codefork.rosalind.Problem;
 import com.codefork.rosalind.util.Genotype;
 
 import java.io.InputStream;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,26 +12,11 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.stream.IntStream;
 
+import static com.codefork.rosalind.util.Math.fact;
+
 public class IndependentAlleles extends Problem {
 
     public static int OFFSPRING_PER_GENERATION = 2;
-
-    // factorials on inputs will overflow ints, so use BigInteger
-    public static BigInteger fact(int x) {
-        var one = new BigInteger("1");
-        if(x == 0 || x == 1) {
-            return one;
-        }
-        var result = new BigInteger(Integer.toString(x));
-        for(var i=x; i > 0; i--) {
-            if(i == 1) {
-                break;
-            } else {
-                result = result.multiply(new BigInteger(Integer.toString(i)).subtract(one));
-            }
-        }
-        return result;
-    }
 
     /**
      * Math.pow() but for floats
